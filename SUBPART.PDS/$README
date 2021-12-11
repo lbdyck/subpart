@@ -12,7 +12,7 @@ Syntax:    subpart (with lines selected)
         or subpart ?
 
 Data Line Selection is by excluding those lines that are not to be submitted
-and then use subpart nx or selecting the desired lines using  SS or S# .
+and then use subpart nx or selecting the desired lines using SS or S#.
 
 Note: By excluding the lines not to submit the desired lines do not have to
 be contiguous.
