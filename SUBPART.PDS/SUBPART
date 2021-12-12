@@ -7,14 +7,17 @@
   |                                                            |
   | Syntax:    subpart                                         |
   |         or subpart first last                              |
-  |         or subpart nx                                      |
-  |         or subpart ?                                       |
+  |         or subpart nx          (non-excluded records)      |
+  |         or subpart *           (all records)               |
+  |         or subpart ?           (tutorial)                  |
+  |         or subpart             (tutorial)                  |
   |                                                            |
   | Notes:     Select the records to submit using SS/SS or S## |
   |                                                            |
   | Author:    Lionel B. Dyck                                  |
   |                                                            |
   | History:  (most recent on top)                             |
+  |            2021/12/12 LBD - Small refinement               |
   |            2021/12/11 LBD - Refinement                     |
   |            2021/12/10 LBD - Creation                       |
   |                                                            |
@@ -25,40 +28,35 @@
   /* --------------- *
    | Define defaults |
    * --------------- */
-  parse value '' with null nx startl
-
-  /* ------------------ *
-   | Check for help (?) |
-   * ------------------ */
-  if opt = '?' then call do_tutor
+  parse value '' with null nx startl jcl
 
   /* --------------------------------------------- *
-   | Check options if any then get start/end lines |
-   * --------------------------------------------- */
-  if opt = null then do
-    'Process Range S'
-    if rc = 0 then do
-      "(startl) = linenum .zfrange"
-      "(endl) = linenum .zlrange"
+  | Check options if any then get start/end lines |
+  * --------------------------------------------- */
+ 'Process Range S'
+ prange_rc = rc
+  Select
+    When opt = '?' then call do_tutor
+    when opt = '*' then do
+         '(startl) = linenum .zfirst'
+         '(endl)   = linenum .zlast'
+         jcl = last
+         end
+    When prange_rc = 0 then do
+      if rc = 0 then do
+        "(startl) = linenum .zfrange"
+        "(endl)   = linenum .zlrange"
+      end
     end
+    When words(opt) = 2 then
+      parse value opt with startl endl
+    When translate(opt) = 'NX'
+      then do
+        nx = 1
+        '(last) = linenum .zlast'
+      end
+    Otherwise call do_tutor
   end
-  else do
-    if words(opt) = 2 then
-    parse value opt with startl endl
-    else if translate(opt) = 'NX'
-    then do
-      nx = 1
-      '(last) = linenum .zlast'
-    end
-    else call do_tutor
-  end
-
-  /* ------------------------------------------------ *
-   | Check for null option and no startline for tutor |
-   * ------------------------------------------------ */
-  if opt = null
-  then if startl = null
-  then call do_tutor
 
   /* ---------------------------------------------------------- *
    | Now process the data                                       |
@@ -83,6 +81,7 @@
    | Get number of records queued for submission and then |
    | queue a null record for end-of-file.                 |
    * ---------------------------------------------------- */
+   if jcl = null then
   jcl = queued()
   queue ''
 
@@ -134,9 +133,10 @@ Do_Tutor:
 +to be submitted.
 +
 %Syntax:+   subpart (with lines selected)
-+        or subpart first last
-+        or subpart nx
-+        or subpart ?
++         or subpart nx          (non-excluded records)
++         or subpart *           (all records)
++         or subpart ?           (tutorial)
++         or subpart             (tutorial)
 +
 %Data Line Selection+is by excluding those lines that are%not+to be submitted
 +and then use %subpart nx+or selecting the desired lines using %SS+or%S#+.

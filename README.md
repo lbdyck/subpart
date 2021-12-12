@@ -8,9 +8,10 @@ for batch processing. It allows for the selection of which data records are
 to be submitted.
 
 Syntax:    subpart (with lines selected)
-        or subpart first last
-        or subpart nx
-        or subpart ?
+         or subpart nx          (non-excluded records)
+         or subpart *           (all records)
+         or subpart ?           (tutorial)
+         or subpart             (tutorial)
 
 Data Line Selection is by excluding those lines that are not to be submitted
 and then use subpart nx or selecting the desired lines using **SS** or **S#**.
