@@ -24,3 +24,19 @@ INSTALLATION
 
 Copy the SUBPART member, which is the REXX exec, into a library in your
 SYSEXEC, or SYSPROC, allocations.
+
+USE CASES
+
+Case 1: Utility JOB
+        Have records with different utilty functions and only submit
+        the desired function without having multiple members for each
+        function, or without having to delete all functions except the
+        desired one.
+
+Case 2: Verification Jobs
+        All shipped in the same PDS member but you only want to submit
+        one, or a few, of the jobs.
+
+Case 3: Compile, Link, Test JOB
+        Submit only the Compile part of the job, or just the Compile and
+        Link, or just the Test part of the job.
