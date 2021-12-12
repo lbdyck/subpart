@@ -3,10 +3,11 @@
   |                                                            |
   | Function:  ISPF Edit Macro to Submit to the internal       |
   |            Reader only the select parts of the data under  |
-  |            ISPF Edit.                                      |
+  |            ISPF Edit. LRECLs other than 80 supported.      |
   |                                                            |
-  | Syntax:    subpart                                         |
-  |         or subpart first last                              |
+  | Syntax:    subpart             (with lines selected)       |
+  |         or subpart first# last#                            |
+  |         or subpart first-lab last-lab                      |
   |         or subpart nx          (non-excluded records)      |
   |         or subpart *           (all records)               |
   |         or subpart ?           (tutorial)                  |
@@ -18,6 +19,8 @@
   |                                                            |
   | History:  (most recent on top)                             |
   |            2021/12/12 LBD - Small refinement               |
+  |                           - Support LRECLs other than 80   |
+  |                           - Support labels                 |
   |            2021/12/11 LBD - Refinement                     |
   |            2021/12/10 LBD - Creation                       |
   |                                                            |
@@ -33,6 +36,7 @@
   /* --------------------------------------------- *
   | Check options if any then get start/end lines |
   * --------------------------------------------- */
+  '(lrecl) = lrecl'
  'Process Range S'
  prange_rc = rc
   Select
@@ -40,7 +44,7 @@
     when opt = '*' then do
          '(startl) = linenum .zfirst'
          '(endl)   = linenum .zlast'
-         jcl = last
+         jcl = endl
          end
     When prange_rc = 0 then do
       if rc = 0 then do
@@ -48,8 +52,13 @@
         "(endl)   = linenum .zlrange"
       end
     end
-    When words(opt) = 2 then
+    When words(opt) = 2 then do
       parse value opt with startl endl
+      if left(startl,1) = '.'
+         then '(startl) = linenum' startl
+      if left(endl,1) = '.'
+         then '(endl) = linenum' endl
+      end
     When translate(opt) = 'NX'
       then do
         nx = 1
@@ -86,11 +95,19 @@
   queue ''
 
   /* ------------------------------- *
-   | Do submit trapping the messages |
-   * ------------------------------- */
-  call outtrap 'x.'
+  | Do submit trapping the messages |
+  * ------------------------------- */
   Address TSO
-  'submit *'
+  call outtrap 'x.'
+  if lrecl /= 80 then do
+    'Alloc f('dd') sysout(b) writer(intrdr)',
+      'Recfm(f) lrecl('lrecl') blksize('lrecl') reuse'
+    'execio * diskw' dd' (finis'
+    'free f('dd')'
+  end
+  else do
+    'submit *'
+  end
   call outtrap 'off'
 
   /* ---------------------------------- *
@@ -130,13 +147,15 @@ Do_Tutor:
 +
 %SUBPART+is an ISPF Edit command (macro) to submit JCL to the Internal Reader
 +for batch processing. It allows for the selection of which data records are
-+to be submitted.
++to be submitted. LRECLs other than 80 are supported.
 +
-%Syntax:+   subpart (with lines selected)
-+         or subpart nx          (non-excluded records)
-+         or subpart *           (all records)
-+         or subpart ?           (tutorial)
-+         or subpart             (tutorial)
+%Syntax:+   subpart                 (with lines selected)
++         or subpart 1st# last#     (e.g. 3 21)
++         or subpart 1stlab lastlab (e.g. .a .b)
++         or subpart nx             (non-excluded records)
++         or subpart *              (all records)
++         or subpart ?              (tutorial)
++         or subpart                (tutorial)
 +
 %Data Line Selection+is by excluding those lines that are%not+to be submitted
 +and then use %subpart nx+or selecting the desired lines using %SS+or%S#+.
