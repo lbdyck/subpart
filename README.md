@@ -4,8 +4,9 @@ ISPF Edit Command (Macro) to  Submit a subset of data lines for batch processing
 ## INTRODUCTION
 
 **SUBPART** is an ISPF Edit command (macro) to submit JCL to the Internal Reader
-for batch processing. It allows for the selection of which data records are
-to be submitted. LRECLs other than 80 supported.
+for batch processing, and is intended for datasets with LRECL > 80 as the IBM
+ISPF Edit Submit supports all but the 1st# and last# options of SUBPART.  It
+allows for the selection of which data records are to be submitted.
 
 Syntax:    subpart                 (with lines selected)
          or subpart 1st# last#     (e.g. 3 21)

@@ -1,9 +1,12 @@
   /*---------------------  rexx procedure  -------------------- *
-  | Name:      SubPart                                         |
+  | Name:      SubPart   (for Submit with LRECL > 80)          |
   |                                                            |
   | Function:  ISPF Edit Macro to Submit to the internal       |
   |            Reader only the select parts of the data under  |
   |            ISPF Edit. LRECLs other than 80 supported.      |
+  |                                                            |
+  |            The ISPF Edit SUBMIT supports all these         |
+  |            options *except* the first# last#.              |
   |                                                            |
   | Syntax:    subpart             (with lines selected)       |
   |         or subpart first# last#                            |
@@ -146,8 +149,9 @@ Do_Tutor:
 %Command ===>_ZCMD
 +
 %SUBPART+is an ISPF Edit command (macro) to submit JCL to the Internal Reader
-+for batch processing. It allows for the selection of which data records are
-+to be submitted. LRECLs other than 80 are supported.
++for batch processing, and is intended for datasets with LRECL > 80 as the IBM
++ISPF Edit Submit supports all but the 1st# and last# options of SUBPART.  It
++allows for the selection of which data records are to be submitted.
 +
 %Syntax:+   subpart                 (with lines selected)
 +         or subpart 1st# last#     (e.g. 3 21)
